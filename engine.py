@@ -289,20 +289,18 @@ class ClassPlaceHolder():
 
 
         self.tile_image = []
-
+        self.icon_image = []
+        self.hover_image = []
+        self.blit_tile = []
         #config
         self.config = ConfigParser()
         self.config.read("data/assets/pos.ini")
 
-        self.config.set(f"Assets Positions", "hs_pos", "0")
-        self.config.set(f"Assets Positions", "tr_pos", "0")
-        self.config.set(f"Assets Positions", "bs_pos", "0")
 
         self.hs_pos = self.config.getint("Assets Positions", "hs_pos")
         self.tr_pos = self.config.getint("Assets Positions", "tr_pos")
         self.bs_pos = self.config.getint("Assets Positions", "bs_pos")
-        with open("data/assets/pos.ini", "w") as config:
-            self.config.write(config)
+
         #self.bs_pos = self
         #self.rk_pos =
 
@@ -318,6 +316,14 @@ class ClassPlaceHolder():
         for i in range(1, 5):
             image = pg.image.load(f"data/icons/icon- ({i}).png")
             image = pg.transform.scale(image, (self.button_width, self.button_height))
+            self.icon_image.append(image)
+
+        for i in range(1, 5):
+            image = pg.image.load(f"data/icons/icon- ({i}).png")
+            self.hover_image.append(image)
+
+        for i in range(1, 8):
+            image = pg.image.load(f"data/assets/asset- ({i}).png")
             self.tile_image.append(image)
 
         for row in range(self.button_rows):
@@ -333,13 +339,19 @@ class ClassPlaceHolder():
 
 
     def writePos(self):
-        pass
+        def update_pos():
+            self.config.set("Assets Positions", "hs_pos", f"{mx,my}")
+            self.config.set("Assets Positions", "tr_pos", f"{mx,my}")
+            self.config.set("Assets Positions", "bs_pos", f"{mx,my}")
 
+            with open("data/assets/pos.ini", "w") as config:
+                self.config.write(config)
 
     def update(self, keyinput, display, mx , my, mouseinput):
 
         def placeholder():
             for button in self.buttons:
+
                 if button["rect"].collidepoint(mx // 3 , my //3):
                     print("COLLIDEEDDD")
                     if mouseinput[0]:
@@ -347,7 +359,17 @@ class ClassPlaceHolder():
 
 
                 pg.draw.rect(display, (255,255,255), button["rect"], 1)
-                display.blit(self.tile_image[button["item"]],(button["posx"], button["posy"]))
+                display.blit(self.icon_image[button["item"]],(button["posx"], button["posy"]))
+
+            if mouseinput[0]:
+                self.blit_tile.append([self.hover_image[self.item_selected], mx//3,my//3])
+
+            display.blit(self.hover_image[self.item_selected], (mx //3 , my//3))
+
+
+            for tile in self.blit_tile:
+                display.blit(tile[0], (tile[1] - lomi.cameraX , tile[2] - lomi.cameraY ))
+            #for i in range(0, self.item_selected):
 
         if keyinput[pg.K_e] and self.tab == False:
             self.tab = True
